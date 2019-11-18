@@ -3,7 +3,15 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
+import axios from 'axios'
+Vue.prototype.$axios = axios
+
+import '@/assets/css/common.css'
 Vue.config.productionTip = false
+
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+Vue.use(ElementUI)
 
 new Vue({
   router,
