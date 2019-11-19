@@ -148,6 +148,8 @@ export default {
           }
           item.content.time = moment(item.content.time).format('YYYY-MM-DD HH:mm:ss')
           return item
+        }).filter(item => {
+          return item.type
         })
       })
     },
