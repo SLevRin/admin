@@ -6,7 +6,7 @@
         class="select"
         v-model="typeSelected"
         filterable
-        placeholder="请选择类型"
+        placeholder="请选择消息类型"
       >
         <el-option
           label="重要消息"
@@ -25,11 +25,11 @@
         class="select"
         v-model="userIdSelected"
         filterable
-        placeholder="请选择用户"
+        placeholder="请选择接收用户"
       >
         <el-option
-          label="所有人"
-          :value="''"
+          label="所有用户"
+          value=""
         />
         <el-option
           v-for="(item, index) in userId"
@@ -128,14 +128,14 @@ export default {
   },
   methods: {
     getAllData() {
-      this.$axios.get('http://127.0.0.1/getAllMsg').then(res => {
+      this.$axios.get(serverUrl + '/getAllMsg').then(res => {
         this.allData = res.data.map(item => {
           var type = ''
           switch (item.type) {
             case 2:
               type = '重要消息'
               break
-            case 3: 
+            case 3:
               type = '紧急消息'
               break
             case 4:
@@ -144,7 +144,7 @@ export default {
           }
           item.type = type
           if (!item.userId) {
-            item.userId = '所有人'
+            item.userId = '所有用户'
           }
           item.content.time = moment(item.content.time).format('YYYY-MM-DD HH:mm:ss')
           return item
@@ -152,25 +152,25 @@ export default {
       })
     },
     getUserId() {
-      this.$axios.get('http://127.0.0.1/getUserId').then(res => {
+      this.$axios.get(serverUrl + '/getUserId').then(res => {
         this.userId = res.data
       })
     },
     upload() {
-      if (!this.typeSelected || this.userIdSelected === null || !this.input) {
+      if (this.typeSelected === null || this.userIdSelected === null || !this.input) {
         return this.$message({
           message: '请填写完整!',
           type: 'error'
         })
       } else {
-        this.$axios.post('http://127.0.0.1', {
-          userId: this.userIdSelected,
+        this.$axios.post(serverUrl, {
+          userId: [this.userIdSelected],
           data: {
             type: this.typeSelected,
             content: {
+              id: uuid(),
               time: Date.now(),
-              data: this.input,
-              id: uuid()
+              data: this.input
             }
           }
         }).then(res => {
@@ -185,9 +185,8 @@ export default {
       }
     },
     handleDelete(row) {
-      console.log(row)
-      this.$axios.post('http://127.0.0.1', {
-        userId: row.userId === '所有人' ? '' : row.userId,
+      this.$axios.post(serverUrl, {
+        userId: [row.userId === '所有用户' ? '' : row.userId],
         data: {
           type: 6,
           content: {
@@ -243,7 +242,7 @@ export default {
         background-color: #409eff;
       }
     }
-}
+  }
   .table {
     padding: 0 20px;
   }

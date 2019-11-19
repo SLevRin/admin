@@ -9,8 +9,12 @@ const routes = [
     component: () => import('@/views/Message/Message.vue')
   },
   {
+    path: '/feedback',
+    component: () => import('@/views/Feedback/Feedback.vue')
+  },
+  {
     path: '/*',
-    redirect: '/home'
+    redirect: '/message'
   }
 ]
 

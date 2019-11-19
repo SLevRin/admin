@@ -3,6 +3,7 @@
     <div class="header">
       <ul>
         <router-link tag="li" to="/message">消息管理</router-link>
+        <router-link tag="li" to="/feedback">反馈信息</router-link>
       </ul>
     </div>
     <router-view />
