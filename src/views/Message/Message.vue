@@ -29,18 +29,19 @@
       >
         <el-option
           label="所有用户"
-          value=""
+          :value="userId"
         />
         <el-option
           v-for="(item, index) in userId"
           :key="index"
           :label="item"
-          :value="item"
+          :value="[item]"
         />
       </el-select>
       <el-input class="input" v-model="input" placeholder="请输入消息内容" clearable />
       <div class="button" @click="upload">添加</div>
     </div>
+    <!-- --- -->
     <!-- 表格区域 -->
     <el-table
       class="table"
@@ -129,27 +130,29 @@ export default {
   methods: {
     getAllData() {
       this.$axios.get(serverUrl + '/getAllMsg').then(res => {
-        this.allData = res.data.map(item => {
-          var type = ''
-          switch (item.type) {
+        this.allData = res.data.filter(item => {
+          return item.data.type !== 1
+        }).map(item => {
+          var obj = {}
+          if (item.userId[0]) {
+            obj.userId = item.userId[0]
+          } else {
+            obj.userId = '所有用户'
+          }
+          switch (item.data.type) {
             case 2:
-              type = '重要消息'
+              obj.type = '重要消息'
               break
             case 3:
-              type = '紧急消息'
+              obj.type = '紧急消息'
               break
             case 4:
-              type = '普通消息'
+              obj.type = '普通消息'
               break
           }
-          item.type = type
-          if (!item.userId) {
-            item.userId = '所有用户'
-          }
-          item.content.time = moment(item.content.time).format('YYYY-MM-DD HH:mm:ss')
-          return item
-        }).filter(item => {
-          return item.type
+          obj.content = item.data.content
+          obj.content.time = moment(obj.content.time).format('YYYY-MM-DD HH:mm:ss')
+          return obj
         })
       })
     },
@@ -159,14 +162,14 @@ export default {
       })
     },
     upload() {
-      if (this.typeSelected === null || this.userIdSelected === null || !this.input) {
+      if (!this.typeSelected || !this.userIdSelected || !this.input) {
         return this.$message({
           message: '请填写完整!',
           type: 'error'
         })
       } else {
         this.$axios.post(serverUrl, {
-          userId: [this.userIdSelected],
+          userId: this.userIdSelected,
           data: {
             type: this.typeSelected,
             content: {
@@ -181,14 +184,19 @@ export default {
               message: '添加成功!',
               type: 'success'
             })
+            this.getAllData()
+          } else {
+            this.$message({
+              message: '添加失败!',
+              type: 'error'
+            })
           }
-          this.getAllData()
         })
       }
     },
     handleDelete(row) {
       this.$axios.post(serverUrl, {
-        userId: [row.userId === '所有用户' ? '' : row.userId],
+        userId: [],
         data: {
           type: 6,
           content: {
@@ -201,8 +209,13 @@ export default {
             message: '删除成功!',
             type: 'success'
           })
+          this.getAllData()
+        } else {
+          this.$message({
+            message: '删除失败!',
+            type: 'error'
+          })
         }
-        this.getAllData()
       })
     }
   }

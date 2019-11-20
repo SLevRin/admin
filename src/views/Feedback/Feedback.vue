@@ -99,6 +99,11 @@ export default {
             type: 'success'
           })
           this.getAllData()
+        } else {
+          this.$message({
+            message: '删除失败!',
+            type: 'error'
+          })
         }
       })
 
