@@ -24,18 +24,21 @@
       <el-select
         class="select"
         v-model="userIdSelected"
+        multiple
+        collapse-tags
         filterable
         placeholder="请选择接收用户"
+        @change="change"
       >
         <el-option
           label="所有用户"
-          :value="userId"
+          value=""
         />
         <el-option
           v-for="(item, index) in userId"
           :key="index"
           :label="item"
-          :value="[item]"
+          :value="item"
         />
       </el-select>
       <el-input class="input" v-model="input" placeholder="请输入消息内容" clearable />
@@ -56,12 +59,15 @@
         <el-table-column prop="type" label="类型" sortable="custom" />
         <el-table-column prop="userId" label="用户" sortable="custom" />
         <el-table-column prop="content.data" label="消息内容" sortable="custom" />
+        <el-table-column prop="id" label="id" v-if="false" />
         <el-table-column label="操作">
           <template slot-scope="scope">
             <el-button
               size="mini"
               type="danger"
-              @click="handleDelete(scope.row)">删除</el-button>
+              @click="handleDelete(scope.row)">
+              删除
+            </el-button>
           </template>
         </el-table-column>
       </template>
@@ -94,7 +100,7 @@ export default {
       sort: {},
       loading: false,
       typeSelected: null,
-      userIdSelected: null,
+      userIdSelected: [],
       userId: [],
       input: ''
     }
@@ -133,12 +139,16 @@ export default {
         this.allData = res.data.filter(item => {
           return item.data.type !== 1
         }).map(item => {
-          var obj = {}
-          if (item.userId[0]) {
-            obj.userId = item.userId[0]
-          } else {
-            obj.userId = '所有用户'
+          var obj = {
+            userId: '',
+            type: '',
+            id: item.data.content.id,
+            content: {
+              time: moment(item.data.content.time).format('YYYY-MM-DD HH:mm:ss'),
+              data: item.data.content.data
+            }
           }
+          obj.userId = item.userId.join(',') || '所有用户'
           switch (item.data.type) {
             case 2:
               obj.type = '重要消息'
@@ -150,8 +160,6 @@ export default {
               obj.type = '普通消息'
               break
           }
-          obj.content = item.data.content
-          obj.content.time = moment(obj.content.time).format('YYYY-MM-DD HH:mm:ss')
           return obj
         })
       })
@@ -161,8 +169,17 @@ export default {
         this.userId = res.data
       })
     },
+    change(e) {
+      if (e[e.length - 1] === '') {
+        this.userIdSelected = ['']
+      } else {
+        this.userIdSelected = this.userIdSelected.filter(item => {
+          return item !== ''
+        })
+      }
+    },
     upload() {
-      if (!this.typeSelected || !this.userIdSelected || !this.input) {
+      if (!this.typeSelected || !this.userIdSelected.length || !this.input) {
         return this.$message({
           message: '请填写完整!',
           type: 'error'
@@ -200,7 +217,7 @@ export default {
         data: {
           type: 6,
           content: {
-            id: row.content.id
+            id: row.id
           }
         }
       }).then(res => {
