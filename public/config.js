@@ -1,1 +1,1 @@
-var serverUrl = 'http://192.168.0.179'
+var serverUrl = 'http://106.54.162.113'
