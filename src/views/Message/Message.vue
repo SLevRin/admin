@@ -51,8 +51,6 @@
       height="100%"
       :data="tableData"
       @sort-change="sort=$event"
-      v-loading="loading"
-      element-loading-background="#fff"
     >
       <template v-if="tableData.length">
         <el-table-column prop="content.time" label="时间" sortable="custom" />
@@ -98,7 +96,6 @@ export default {
       current: 1,
       size: 50,
       sort: {},
-      loading: false,
       typeSelected: null,
       userIdSelected: [],
       userId: [],

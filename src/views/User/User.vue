@@ -1,5 +1,5 @@
 <template>
-  <div class="message">
+  <div class="user">
     <!-- 表格区域 -->
     <el-table
       class="table"
@@ -8,14 +8,8 @@
       @sort-change="sort=$event"
     >
       <template v-if="tableData.length">
-        <el-table-column prop="time" label="时间" sortable="custom" />
-        <el-table-column prop="name" label="姓名" sortable="custom" />
-        <el-table-column prop="phone" label="手机号码" sortable="custom" />
-        <el-table-column prop="coName" label="公司名称" sortable="custom" />
-        <el-table-column prop="weChat" label="微信号码" sortable="custom" />
-        <el-table-column prop="content" label="反馈内容" sortable="custom" />
-        <el-table-column prop="_id" label="id" v-if="false" />
-        <el-table-column label="操作">
+        <el-table-column prop="userId" label="用户名" sortable="custom" align="center" />
+        <el-table-column label="操作" align="center">
           <template slot-scope="scope">
             <el-button
               size="mini"
@@ -63,17 +57,9 @@ export default {
       var size = this.size
       var tableData = allData.slice().sort((a, b) => {
         if (sort.order === 'descending') {
-          if (sort.prop === 'time') {
-            return Date.parse(b.time) - Date.parse(a.time)
-          } else {
-            return b[sort.prop] > a[sort.prop] ? 1 : -1
-          }
+          return b[sort.prop] > a[sort.prop] ? 1 : -1
         } else if (sort.order === 'ascending') {
-          if (sort.prop === 'time') {
-            return Date.parse(a.time) - Date.parse(b.time)
-          } else {
-            return a[sort.prop] > b[sort.prop] ? 1 : -1
-          }
+          return a[sort.prop] > b[sort.prop] ? 1 : -1
         }
       }).slice((current - 1) * size, current * size)
       return tableData
@@ -81,15 +67,16 @@ export default {
   },
   methods: {
     getAllData() {
-      this.$axios.get(serverUrl + '/getFeedback').then(res => {
+      this.$axios.get(serverUrl + '/getUserId').then(res => {
         this.allData = res.data.map(item => {
-          item.time = moment(item.time).format('YYYY-MM-DD HH:mm:ss')
-          return item
+          return {
+            userId: item
+          }
         })
       })
     },
     handleDelete(row) {
-      this.$axios.get(serverUrl + '/delFeedback?id=' + row._id).then(res => {
+      this.$axios.get(serverUrl + '/delUser?userId=' + row.userId).then(res => {
         if (res.data.status === 1) {
           this.$message({
             message: '删除成功!',
@@ -109,7 +96,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.message {
+.user {
   height: 100%;
   background-color: #fff;
   display: flex;
