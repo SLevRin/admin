@@ -43,6 +43,7 @@
       </el-select>
       <el-input class="input" v-model="input" placeholder="请输入消息内容" clearable />
       <div class="button" @click="upload">添加</div>
+      <div class="button" @click="setToken">设置</div>
     </div>
     <!-- --- -->
     <!-- 表格区域 -->
@@ -182,7 +183,7 @@ export default {
           type: 'error'
         })
       } else {
-        this.$axios.post(serverUrl, {
+        this.$axios.post(serverUrl + '?token=' + localStorage.getItem('token'), {
           userId: this.userIdSelected,
           data: {
             type: this.typeSelected,
@@ -209,7 +210,7 @@ export default {
       }
     },
     handleDelete(row) {
-      this.$axios.post(serverUrl, {
+      this.$axios.post(serverUrl + '?token=' + localStorage.getItem('token'), {
         userId: [],
         data: {
           type: 6,
@@ -231,6 +232,34 @@ export default {
           })
         }
       })
+    },
+    setToken() {
+      this.$prompt('请输入token', '设置', {
+        inputValue: localStorage.getItem('token')
+      }).then(({ value }) => {
+        if (!value) {
+          return this.$message({
+              message: '请输入token!',
+              type: 'error'
+          })
+        }
+        this.$axios.post(serverUrl + '/setToken?token=' + localStorage.getItem('token'), {
+          token: value
+        }).then(res => {
+          if (res.data.status === 1) {
+            this.$message({
+              message: '设置成功!',
+              type: 'success'
+            })
+          } else {
+            this.$message({
+              message: '设置失败!',
+              type: 'error'
+            })
+          }
+        })
+        localStorage.setItem('token', value)
+      }).catch(() => {})
     }
   }
 }

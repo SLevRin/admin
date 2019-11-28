@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" v-loading="loading" element-loading-background="#fff">
     <div class="header">
       <ul>
         <router-link tag="li" to="/user">用户管理</router-link>
@@ -10,6 +10,48 @@
     <router-view />
   </div>
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      loading: true
+    }
+  },
+  created() {
+    this.token()
+  },
+  methods: {
+    token() {
+      localStorage.setItem('token', '')
+      this.$prompt('请输入token', 'token', {
+        showCancelButton: false
+      }).then(({ value }) => {
+        this.$axios.post(serverUrl + '/setToken?token=' + value, {
+          token: value
+        }).then(res => {
+          if (res.data.status === 1) {
+            this.$message({
+              message: 'token正确!',
+              type: 'success'
+            })
+            this.loading = false
+          } else {
+            this.$message({
+              message: 'token错误!',
+              type: 'error'
+            })
+            this.token()
+          }
+        })
+        localStorage.setItem('token', value)
+      }).catch(() => {
+        this.token()
+      })
+    }
+  }
+}
+</script>
 
 <style lang="scss">
 #app {
